@@ -1,0 +1,6 @@
+---
+- name: Check and run Python program
+  hosts: bsd
+  tasks:
+    - name: Run flask app
+      shell: (cd web; screen -dmS web python3 server.py)
