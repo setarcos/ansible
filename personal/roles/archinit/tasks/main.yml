@@ -1,0 +1,154 @@
+- name: Configure pacman mirror
+  template: src=mirrorlist.j2 dest=/etc/pacman.d/mirrorlist owner=root group=root mode=0644
+
+- name: Install essential tools
+  pacman: name=less,vim,nano,tmux,htop,ncdu,bash-completion,rsync,vnstat state=present
+
+- name: Install compsize for use with btrfs
+  pacman: name=compsize state=present
+  when: filesystem == "btrfs"
+
+- name: Start and enable vnstatd
+  service: name=vnstat enabled=yes state=started
+
+- name: Update package cache again
+  pacman: update_cache=yes
+
+- name: Start and enable auditd
+  service: name=auditd enabled=yes state=started
+
+- name: Start and enable systemd-timesyncd
+  service: name=systemd-timesyncd enabled=yes state=started
+
+- name: Install smart
+  pacman: name=smartmontools state=present
+  when: ansible_virtualization_role == "host"
+
+- name: Configure smartd to do periodic health checks
+  copy: src=smartd.conf dest=/etc/smartd.conf owner=root group=root mode=0644
+  when: ansible_virtualization_role == "host"
+
+- name: Start and enable smart
+  service: name=smartd enabled=yes state=started
+  when: ansible_virtualization_role == "host"
+
+- name: Start and enable btrfs scrub timer
+  service: name=btrfs-scrub@{{ '-' if (item.mount | length == 1) else (item.mount.split("/", 1)[1] | replace("/", "-")) }}.timer enabled=yes state=started
+  loop: "{{ ansible_mounts | sort(attribute='mount') | groupby('uuid') | map(attribute=1) | map('first') }}"
+  when:
+    - item.fstype == 'btrfs'
+    - not 'backup' in item.mount
+
+- name: Configure locales
+  template: src=locale.conf.j2 dest=/etc/locale.conf owner=root group=root mode=0644
+
+- name: Generate ssh key for root
+  command: ssh-keygen -b 4096 -N "" -f /root/.ssh/id_rsa creates="/root/.ssh/id_rsa"
+
+- name: Configure networking
+  include_role:
+    name: networking
+  when: configure_network
+
+- name: Configure tcp receive window limits
+  sysctl:
+    name: net.ipv4.tcp_rmem
+    value: "{{ tcp_rmem }}"
+    sysctl_set: true
+    sysctl_file: /etc/sysctl.d/net.conf
+  when: tcp_rmem is defined
+
+- name: Configure tcp send window limits
+  sysctl:
+    name: net.ipv4.tcp_wmem
+    value: "{{ tcp_wmem }}"
+    sysctl_set: true
+    sysctl_file: /etc/sysctl.d/net.conf
+  when: tcp_wmem is defined
+
+- name: Configure size of connection tracking table
+  sysctl:
+    name: net.netfilter.nf_conntrack_max
+    value: "{{ nf_conntrack_max }}"
+    sysctl_set: true
+    sysctl_file: /etc/sysctl.d/net.conf
+  when: nf_conntrack_max is defined
+
+- name: Create drop-in directories for systemd configuration
+  file: path=/etc/systemd/{{ item }}.d state=directory owner=root group=root mode=0755
+  loop:
+    - system.conf
+    - journald.conf
+
+- name: Install journald.conf overrides
+  template: src=journald.conf.j2 dest=/etc/systemd/journald.conf.d/override.conf owner=root group=root mode=644
+  notify:
+    - Restart journald
+
+- name: Install system.conf overrides
+  template: src=system.conf.j2 dest=/etc/systemd/system.conf.d/override.conf owner=root group=root mode=0644
+  notify:
+    - Systemd daemon-reload
+
+- name: Install zram-generator
+  pacman: name=zram-generator state=present
+  when: enable_zram_swap
+
+- name: Install zram-generator config for zram
+  template: src=zram-generator.conf dest=/etc/systemd/zram-generator.conf owner=root group=root mode=0644
+  notify:
+    - Restart systemd-zram-setup@zram0
+  when: enable_zram_swap
+
+- name: Disable zswap to prevent conflict with zram
+  copy: content="w- /sys/module/zswap/parameters/enabled - - - - N" dest=/etc/tmpfiles.d/zram.conf owner=root group=root mode=0644
+  register: zramtmpfiles
+  when: enable_zram_swap
+
+- name: Use tmpfiles.d/zram.conf  # noqa no-changed-when
+  command: systemd-tmpfiles --create
+  when: zramtmpfiles.changed
+
+- name: Create drop-in directories for oomd
+  file: path=/etc/systemd/system/{{ item }}.d state=directory owner=root group=root mode=0755
+  with_items:
+    - "-.slice"
+    - user@.service
+
+- name: Install drop-in snippets for oomd
+  copy: src=oomd-override_{{ item }}.conf dest=/etc/systemd/system/{{ item }}.d/override.conf owner=root group=root mode=0644
+  with_items:
+    - "-.slice"
+    - user@.service
+  notify:
+    - Systemd daemon-reload
+
+- name: Start systemd-oomd
+  service: name=systemd-oomd state=started enabled=yes
+
+- name: Install logrotate
+  pacman: name=logrotate state=present
+
+- name: Configure logrotate
+  template: src=logrotate.conf.j2 dest=/etc/logrotate.conf owner=root group=root mode=0644
+
+- name: Enable logrotate timer
+  service: name=logrotate.timer state=started enabled=yes
+
+- name: Create zsh directory
+  file: path=/root/.zsh state=directory owner=root group=root mode=0700
+
+- name: Install root shell config
+  copy: src={{ item }} dest=/root/.{{ item }} owner=root group=root mode=0644
+  with_items:
+    - zshrc
+    - dircolors
+
+- name: Install pacman-contrib and archlinux-contrib
+  pacman: name=pacman-contrib,fakeroot,archlinux-contrib state=installed
+
+- name: Install custom paccache.service
+  copy: src=paccache.service dest=/etc/systemd/system/paccache.service owner=root group=root mode=0644
+
+- name: Enable paccache timer
+  systemd: name=paccache.timer enabled=yes state=started daemon_reload=yes
