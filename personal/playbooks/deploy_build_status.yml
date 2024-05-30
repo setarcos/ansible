@@ -1,0 +1,10 @@
+---
+- name: Deploy and configure web service on Debian server
+  hosts: debian2
+  become: true
+  vars:
+    app_user: www-data
+    app_group: www-data
+    nginx_server_name: arch.madeinpku.club
+  roles:
+    - debianweb
