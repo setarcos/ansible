@@ -1,0 +1,7 @@
+---
+- name: Install and configure vps on Debian
+  hosts: debian
+  become: yes
+  roles:
+    - tailscale
+
