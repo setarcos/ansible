@@ -1,0 +1,15 @@
+server {
+    listen 80;
+    listen [::]:80;
+    server_name {{ nginx_server_name }};
+
+    location /static/ {
+        alias /var/www/status/static/;
+    }
+
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/var/www/status/build-status.sock;
+    }
+}
+

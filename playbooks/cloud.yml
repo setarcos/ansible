@@ -1,0 +1,6 @@
+---
+- name: Cloud arch install test
+  hosts: arch3
+  become: yes
+  roles:
+    - { role: archinit }
