@@ -1,7 +1,11 @@
-- name: Update all installed packages
-  package:
-    name: '*'
-    state: latest
+- name: Update packages on Debian-based systems
+  apt:
+    upgrade: dist
+  when: ansible_os_family == "Debian"
+
+- name: Update packages on Arch Linux
+  command: pacman -Syu --noconfirm
+  when: ansible_os_family == "Archlinux"
 
 - name: Install basic packages
   package:

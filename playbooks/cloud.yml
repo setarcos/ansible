@@ -6,4 +6,7 @@
     - role: debinit
       when: ansible_facts['os_family'] == "Debian"
 
+    - role: archinit
+      when: ansible_facts['os_family'] == "Archlinux"
+
     - role: basic
