@@ -1,0 +1,18 @@
+- name: Configure mirror
+  copy:
+    dest: /etc/apt/mirrors/pku.list
+    content: "https://mirrors.pku.edu.cn/debian\n"
+
+- name: Configure security mirror
+  copy:
+    dest: /etc/apt/mirrors/pku-security.list
+    content: "https://mirrors.pku.edu.cn/debian-security\n"
+
+- name: Configure source
+  template:
+    src: sources.j2
+    dest: /etc/apt/sources.list.d/debian.sources
+
+- name: Update package database
+  apt:
+    update_cache: yes

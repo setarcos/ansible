@@ -1,15 +1,2 @@
 - name: Configure pacman mirror
   template: src=mirrorlist.j2 dest=/etc/pacman.d/mirrorlist owner=root group=root mode=0644
-
-- name: Update package cache again
-  pacman: update_cache=yes
-
-- name: Install essential tools
-  pacman: name=less,vim,tmux,htop,ncdu,bash-completion,rsync,zsh state=present
-
-- name: Install compsize for use with btrfs
-  pacman: name=compsize state=present
-  when: filesystem == "btrfs"
-
-- name: Start and enable auditd
-  service: name=auditd enabled=yes state=started

@@ -1,0 +1,9 @@
+Types: deb deb-src
+URIs: mirror+file:///etc/apt/mirrors/pku.list
+Suites: {{ release }} {{ release }}-updates {{ release }}-backports
+Components: main contrib
+
+Types: deb deb-src
+URIs: mirror+file:///etc/apt/mirrors/pku-security.list
+Suites: {{ release }}-security
+Components: main contrib

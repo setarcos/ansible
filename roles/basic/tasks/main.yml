@@ -1,0 +1,16 @@
+- name: Update all installed packages
+  package:
+    name: '*'
+    state: latest
+
+- name: Install basic packages
+  package:
+    name:
+      - vim
+      - tmux
+      - zsh
+      - fzf
+      - zoxide
+      - exa
+      - git
+    state: present
