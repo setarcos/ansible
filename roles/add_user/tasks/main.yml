@@ -1,0 +1,39 @@
+---
+- name: Create a new user
+  user:
+    name: "{{ username }}"
+    shell: /bin/zsh
+    create_home: yes
+
+- name: Create .ssh directory
+  file:
+    path: "/home/{{ username }}/.ssh"
+    state: directory
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: '0700'
+
+- name: Add SSH public key to authorized_keys
+  copy:
+    content: "{{ ssh_public_key }}"
+    dest: "/home/{{ username }}/.ssh/authorized_keys"
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: '0600'
+
+- name: Copy .vimrc to the user's home directory
+  copy:
+    src: vimrc
+    dest: "/home/{{ username }}/.vimrc"
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: '0644'
+
+- name: Copy .zshrc to the user's home directory
+  copy:
+    src: zshrc
+    dest: "/home/{{ username }}/.zshrc"
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: '0644'
+

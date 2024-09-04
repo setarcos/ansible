@@ -10,3 +10,4 @@
       when: ansible_facts['os_family'] == "Archlinux"
 
     - role: basic
+    - role: add_user
