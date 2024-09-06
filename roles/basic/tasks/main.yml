@@ -7,6 +7,10 @@
   command: pacman -Syu --noconfirm
   when: ansible_os_family == "Archlinux"
 
+- name: Set system timezone
+  ansible.builtin.timezone:
+    name: Asia/Shanghai
+
 - name: Install basic packages
   package:
     name:
