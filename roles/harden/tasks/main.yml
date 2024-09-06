@@ -1,0 +1,27 @@
+- name: Install fail2ban
+  package:
+    name: "fail2ban"
+    state: "present"
+
+- name: Install sshd jail
+  template:
+    src: "sshd.jail.j2"
+    dest: "/etc/fail2ban/jail.d/sshd.local"
+    owner: "root"
+    group: "root"
+    mode: '0644'
+  when: ansible_os_family == "Archlinux"
+
+- name: Modify sshd jail
+  lineinfile:
+  lineinfile:
+    path: "/etc/fail2ban/jail.d/defaults-debian.conf"
+    line: "backend = systemd"
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: Restart fail2ban
+  systemd:
+    name: fail2ban
+    state: restarted
+

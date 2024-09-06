@@ -11,3 +11,4 @@
 
     - role: basic
     - role: add_user
+    - role: harden
