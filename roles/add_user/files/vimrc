@@ -139,12 +139,6 @@ tnoremap <Esc><Esc> <C-\><C-n>
 nnoremap <expr> <silent> k v:count == 0 ? 'gk' : 'k'
 nnoremap <expr> <silent> j v:count == 0 ? 'gj' : 'j'
 
-" TIP: Disable arrow keys in normal mode
-nnoremap <left> :echo "Use h to move!!"<CR>
-nnoremap <right> :echo "Use l to move!!"<CR>
-nnoremap <up> :echo "Use k to move!!"<CR>
-nnoremap <down> :echo "Use j to move!!"<CR>
-
 " Keybinds to make split navigation easier.
 "  Use CTRL+<hjkl> to switch between windows
 "
@@ -214,9 +208,9 @@ colorscheme tokyonight
 
 
 " [[ Configure vim-which-key ]]
-call which_key#register('<Space>', "g:which_key_map")
-nnoremap <silent> <leader>      :<c-u>WhichKey '<Space>'<CR>
-nnoremap <silent> <localleader> :<c-u>WhichKey  '<Space>'<CR>
+call which_key#register('<leader>', "g:which_key_map")
+nnoremap <silent> <leader>      :<c-u>WhichKey '<leader>'<CR>
+nnoremap <silent> <localleader> :<c-u>WhichKey  '<leader>'<CR>
 
 " Document existing key chains
 let g:which_key_map =  {}
@@ -248,6 +242,15 @@ let g:which_key_map[' '] = '[ ] Find existing buffers'
 nmap <leader>/ :BLines<CR>
 let g:which_key_map['/'] = '[/] Fuzzily search in current buffer'
 
+" Close the current buffer
+map <leader>bd :bdelete<cr>
+
+" Close all the buffers
+map <leader>ba :bufdo bd<cr>
+
+map <leader>j :bnext<cr>
+map <leader>k :bprevious<cr>
+map <leader>be :badd<space>
 
 " [[ Configure LSP ]]
 " NOTE: Install new language server using `:LspInstallServer` in the filetype
