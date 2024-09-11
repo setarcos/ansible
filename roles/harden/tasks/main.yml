@@ -22,6 +22,19 @@
 
 - name: Restart fail2ban
   systemd:
-    name: fail2ban
-    state: restarted
+    name: "fail2ban.service"
+    enabled: true
+    state: started
+    daemon-reload: true
 
+- name: Ensure SSH password authentication is disabled
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?PasswordAuthentication'
+    line: 'PasswordAuthentication no'
+    state: present
+
+- name: Restart SSH
+  service:
+    name: sshd
+    state: restarted
