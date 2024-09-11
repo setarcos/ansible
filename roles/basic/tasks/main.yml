@@ -11,6 +11,10 @@
   ansible.builtin.timezone:
     name: Asia/Shanghai
 
+- name: Set the hostname
+  hostname:
+    name: "{{ inventory_hostname }}"
+
 - name: Install basic packages
   package:
     name:
