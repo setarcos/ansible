@@ -37,3 +37,10 @@
     group: "{{ username }}"
     mode: '0644'
 
+- name: Ensure user can run sudo without password
+  lineinfile:
+    path: /etc/sudoers
+    state: present
+    regexp: "^%{{ username }} ALL=(ALL) NOPASSWD:ALL"
+    line: "{{ username }} ALL=(ALL) NOPASSWD:ALL"
+    validate: 'visudo -cf %s'
