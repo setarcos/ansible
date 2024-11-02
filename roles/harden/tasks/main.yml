@@ -14,7 +14,6 @@
 
 - name: Modify sshd jail
   lineinfile:
-  lineinfile:
     path: "/etc/fail2ban/jail.d/defaults-debian.conf"
     line: "backend = systemd"
     state: present
