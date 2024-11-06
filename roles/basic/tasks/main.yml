@@ -25,4 +25,6 @@
       - zoxide
       - exa
       - git
+      - wget
+      - man
     state: present
