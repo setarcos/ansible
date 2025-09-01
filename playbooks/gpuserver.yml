@@ -30,7 +30,7 @@
 
     - name: Add current user to microk8s group
       user:
-        name: "{{ ansible_user_id }}"
+        name: "{{ ansible_env.SUDO_USER | default(ansible_user_id) }}"
         groups: microk8s
         append: yes
 
