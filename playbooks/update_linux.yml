@@ -1,0 +1,25 @@
+---
+- name: Update all Linux systems
+  hosts: all
+  become: yes
+  gather_facts: yes
+
+  tasks:
+    - name: Update Debian systems
+      apt:
+        upgrade: dist
+        update_cache: yes
+        autoremove: yes
+        autoclean: yes
+      when: ansible_facts['os_family'] == "Debian"
+
+    - name: Update Arch systems
+      pacman:
+        update_cache: yes
+        upgrade: yes
+      when: ansible_facts['distribution'] == "Archlinux"
+
+    - name: Update Void systems
+      command: xbps-install -Syu
+      when: ansible_facts['distribution'] == "Void"
+      changed_when: false
