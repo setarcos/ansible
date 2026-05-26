@@ -1,0 +1,7 @@
+[sshd]
+enabled = true
+mode    = aggressive
+logpath = /var/log/socklog/secure/current
+maxretry = 3
+bantime  = 24h
+findtime = 10m
